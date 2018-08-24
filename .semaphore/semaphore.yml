@@ -1,0 +1,29 @@
+version: "v1.0"
+name: First pipeline example
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+ - name: "Explore Env"
+   task:
+     jobs:
+     - name: Store gems in cache
+       commands:
+         - export CHECKSUM=$(echo $(md5sum README.md) | grep -o "^\w*\b")
+         - git clone https://github.com/mimimalizam/haskii.git
+         - cd haskii
+         - bundle install --path vendor/bundle
+         - cache store --key v3-bundle-$CHECKSUM --path vendor
+
+ - name: "Restore gems from cache"
+   task:
+     jobs:
+     - name: Restore gems
+       commands:
+         - export CHECKSUM=$(echo $(md5sum README.md) | grep -o "^\w*\b")
+         - git clone https://github.com/mimimalizam/haskii.git
+         - cd haskii
+         - ls -lah
+         - cache restore --key v3-bundle-$CHECKSUM
+         - bundle install --path vendor/bundle
